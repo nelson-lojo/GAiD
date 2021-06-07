@@ -126,6 +126,8 @@ class Search(commands.Cog):
                         elif reaction.emoji == "➡️":
                             # show next
                             index += 1 if index < (result['numpods'] - 1) else 0
+                            print(f"POD COUNT: {result['numpods']}")
+                            print(f"index {index}")
                         await message.edit(embed=getPanel(index))
                 except asyncio.TimeoutError: 
                     print(f"DROPPING walpha nav handle for query: `{' '.join(queryTerms)}`")
