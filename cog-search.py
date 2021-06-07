@@ -132,8 +132,6 @@ class Search(commands.Cog):
                     await message.remove_reaction('➡️', self.bot.user)
                     await message.remove_reaction('⬅️', self.bot.user)
                     break
-        
-
 
     @commands.command(name='duck', aliases=['duckduckgo', 'd'], brief="query DuckDuckGo", pass_context=True)
     async def duckInstantAnswer(self, context, *queryTerms):
@@ -374,7 +372,8 @@ class Search(commands.Cog):
                 result += f"{', '.join(res['senses'][i]['parts_of_speech'])} - "
                 result += ', '.join(res['senses'][i]['english_definitions']) + '\n'
 
-            panel = embed(' '.join(queryTerms), result, discord.Color.green())
+            slugUrl = f'jisho.org/word/{res["slug"]}'
+            panel = embed(f"[{' '.join(queryTerms)}]({slugUrl})", result, discord.Color.green())
             panel.set_footer(text=' '.join(res['jlpt']))
             return panel
 
