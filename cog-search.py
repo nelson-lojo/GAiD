@@ -79,24 +79,61 @@ class Search(commands.Cog):
         # url = f"http://api.wolframalpha.com/v2/result?appid={appID}&i={query}"
         # answer = requests.get(url).text
         # response = embed(' '.join(queryTerms), answer, discord.Color.red())
+        
         # full answer api
+        
         query = querify(queryTerms, False)
         url = f"http://api.wolframalpha.com/v2/query?appid={appID}&input={query}&output=json"
-        answer = loads(requests.get(url).text)
-        answer = answer['queryresult']
-        if not answer['success']:
-            response = embed(' '.join(queryTerms), 'There was an error in fulfilling this query, please try again', discord.Color.red())
-        else:
-            response = discord.Embed(
-                title=f"Query: {answer['inputstring']}",
+        result = loads(requests.get(url).text)
+        result = result['queryresult']
+
+        if not result['success']:
+            await context.send(embed=embed(
+                ' '.join(queryTerms), 
+                'There was an error in fulfilling this query, please try again', 
+                discord.Color.red()
+            ))
+            return
+
+        def getPanel(index):
+            assert index > -1, "can only handle non-negative indices"
+            panel = discord.Embed(
+                title=f"Query: {result['inputstring']}",
                 color=discord.Color.red()
             )
-            result = answer['pods'][1]['subpods'][0]
-            response.set_image(url=result['img']['src'])
 
-        # broken? why?
-        #response.set_thumbnail(url='https://www.wolframalpha.com/_next/static/images/spikey_3-to7gqW.svg')
-        await context.send(embed=response)
+            panel.set_image(url=result['pods'][index + 1]['subpods'][0]['img']['src'])
+            # broken? why?
+            #panel.set_thumbnail(url='https://www.wolframalpha.com/_next/static/images/spikey_3-to7gqW.svg')
+            return panel
+        
+        index = 0
+        message = await context.send(embed=getPanel(index))
+        await message.add_reaction("⬅️")
+        await message.add_reaction("➡️")
+
+        isAuthor = lambda reaction, user: user == context.author
+        while True:
+                try:
+                    # 30 sec timeout
+                    reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=isAuthor)
+                    
+                    await message.remove_reaction(reaction, user) 
+                    if message == reaction.message:
+                        if reaction.emoji == "⬅️":
+                            # show prev
+                            index -= 1 if index > 0 else 0
+                        elif reaction.emoji == "➡️":
+                            # show next
+                            index += 1 if index < result['numpods'] - 1 else 0
+                        await message.edit(embed=getPanel(index))
+                except asyncio.TimeoutError: 
+                    print(f"DROPPING walpha nav handle for query: `{' '.join(queryTerms)}`")
+                    await message.remove_reaction('➡️', self.bot.user)
+                    await message.remove_reaction('⬅️', self.bot.user)
+                    break
+        
+
 
     @commands.command(name='duck', aliases=['duckduckgo', 'd'], brief="query DuckDuckGo", pass_context=True)
     async def duckInstantAnswer(self, context, *queryTerms):
@@ -235,8 +272,8 @@ class Search(commands.Cog):
 
             index = 0
             message = await context.send(embed=getPanel(index))
-            leftReaction = await message.add_reaction("⬅️")
-            rightReaction = await message.add_reaction("➡️")
+            await message.add_reaction("⬅️")
+            await message.add_reaction("➡️")
 
             isAuthor = lambda reaction, user: user == context.author
             while True:
