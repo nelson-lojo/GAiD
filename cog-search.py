@@ -352,6 +352,8 @@ class Search(commands.Cog):
             await context.send(embed=embed(' '.join(queryTerms), color=discord.Color.green()))
             return
 
+        results_count = len(response['data'])
+
         def getPanel(index):
             try:
                 res = response['data'][index]
@@ -359,12 +361,13 @@ class Search(commands.Cog):
                 print("Issue found in parsing for data")
                 return getPanel(index - 1)
 
-            result = ''
+            result = f'Result {index + 1}/{results_count}\n\n'
+            slugUrl = f'https://jisho.org/word/{res["slug"]}'
             for form in res['japanese']:
-                if form.get('word', None) is not None:
+                if form.get('word', None) is not None and form.get('reading', None) is not None:
                     result += f'{form["word"]} - {form["reading"]}、'
                 else:
-                    result += f'{form["reading"]}、'
+                    result += f'{form["reading"] if form.get("reading", False) else form["word"]}、'
             result = result[:-1]
 
             for i in range(len(res['senses'])):
@@ -372,15 +375,17 @@ class Search(commands.Cog):
                 result += f"{', '.join(res['senses'][i]['parts_of_speech'])} - "
                 result += ', '.join(res['senses'][i]['english_definitions']) + '\n'
 
-            slugUrl = f'jisho.org/word/{res["slug"]}'
-            panel = embed(f"[{' '.join(queryTerms)}]({slugUrl})", result, discord.Color.green())
+            result += f"[View this result in jisho]({slugUrl})"
+
+            panel = embed(' '.join(queryTerms), result, discord.Color.green())
             panel.set_footer(text=' '.join(res['jlpt']))
             return panel
 
         index = 0
         message = await context.send(embed=getPanel(index))
-        await message.add_reaction("⬅️")
-        await message.add_reaction("➡️")
+        if results_count > 1:
+            await message.add_reaction("⬅️")
+            await message.add_reaction("➡️")
 
         isAuthor = lambda reaction, user: user == context.author
         while True:
@@ -395,14 +400,13 @@ class Search(commands.Cog):
                         index -= 1 if index > 0 else 0
                     elif reaction.emoji == "➡️":
                         # show next
-                        index += 1
+                        index += 1 if index < results_count - 1 else 0
                     await message.edit(embed=getPanel(index))
             except asyncio.TimeoutError: 
                 print(f"DROPPING jisho nav handle for query: `{' '.join(queryTerms)}`")
                 await message.remove_reaction('➡️', self.bot.user)
                 await message.remove_reaction('⬅️', self.bot.user)
                 break
-
 
 def setup(client):
     client.add_cog(Search(client, 'AIzaSyCtJB-5h7Onbn72PpaaPRY4adsNKcd6CNM'))
