@@ -9,12 +9,13 @@ from time import time, gmtime, strftime
 
 MAX_QUERIES = 100
 
-def querify(terms, exclude=[]):
+def querify(terms, plusJoin=True, exclude=[]):
     mapping = [
         ('&', '%26'),
         ('%', '%25'),
         ('#', '%23'),
-        ('?', '%3F')
+        ('?', '%3F'),
+        ('+', '%2B')
     ]
     newTerms = []
     for term in terms:
@@ -24,7 +25,11 @@ def querify(terms, exclude=[]):
                 continue
             newTerm = newTerm.replace(*m)
         newTerms.append(newTerm)
-    return "+".join(newTerms)
+    if plusJoin:
+        return "+".join(newTerms)
+    else:
+        return "%20".join(newTerms)
+
 
 def trackQueries(maxCount):
     queryDir = f"GAiD_Queries_{maxCount}"
@@ -69,10 +74,26 @@ class Search(commands.Cog):
     @commands.command(name='walpha', aliases=['wa', 'wolframalpha'], brief="query Wolfram Alpha", pass_context=True)
     async def walpha(self, context, *queryTerms):
         appID = 'JUR6W8-5KWA539AR8'
-        query = querify(queryTerms)
-        url = f"http://api.wolframalpha.com/v2/result?appid={appID}&i={query}"
-        answer = requests.get(url).text
-        response = embed(' '.join(queryTerms), answer, discord.Color.red())
+        # short answer api
+        # query = querify(queryTerms)
+        # url = f"http://api.wolframalpha.com/v2/result?appid={appID}&i={query}"
+        # answer = requests.get(url).text
+        # response = embed(' '.join(queryTerms), answer, discord.Color.red())
+        # full answer api
+        query = querify(queryTerms, False)
+        url = f"http://api.wolframalpha.com/v2/query?appid={appID}&input={query}&output=json"
+        answer = loads(requests.get(url).text)
+        answer = answer['queryresult']
+        if not answer['success']:
+            response = embed(' '.join(queryTerms), 'There was an error in fulfilling this query, please try again', discord.Color.red())
+        else:
+            response = discord.Embed(
+                title=f"Query: {answer['inputstring']}",
+                color=discord.Color.red()
+            )
+            result = answer['pods'][1]['subpods'][0]
+            response.set_image(url=result['img']['src'])
+
         # broken? why?
         #response.set_thumbnail(url='https://www.wolframalpha.com/_next/static/images/spikey_3-to7gqW.svg')
         await context.send(embed=response)
