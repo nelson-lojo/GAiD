@@ -8,6 +8,7 @@ class Modularity(commands.Cog):
 
     owner = 'Nelson Lojo#7813'
     whitelistDir = 'whitelists'
+    cogDir = 'cogs'
 
     def __init__(self, bot):
         self.bot = bot
@@ -53,7 +54,7 @@ class Modularity(commands.Cog):
         
         for cog in cogs:
             try:
-                self.bot.load_extension(f'cog-{cog}')
+                self.bot.load_extension(f'{Modularity.cogDir}.{cog}')
                 loaded.append(cog)
             except ExtensionNotFound:
                 notFound.append(cog)
@@ -81,7 +82,7 @@ class Modularity(commands.Cog):
 
         for cog in cogs:
             try:
-                self.bot.unload_extension(f'cog-{cog}')
+                self.bot.unload_extension(f'{Modularity.cogDir}.{cog}')
                 unloaded.append(cog)
             except ExtensionNotLoaded:
                 notLoaded.append(cog)
