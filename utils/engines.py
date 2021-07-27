@@ -1,8 +1,8 @@
 from typing import List, Tuple
-from keys import keys
+from utils.keys import keys
+from utils.result import Page, Result
 import requests
 import json
-from result import Page, Result
 from discord import Color
 
 def querify(terms: List[str], plusJoin: bool=True, exclude: List[str]=[]) -> str:
@@ -28,6 +28,10 @@ def querify(terms: List[str], plusJoin: bool=True, exclude: List[str]=[]) -> str
 
 def walpha(queryTerms: List[str]) -> Result:
     query = querify(queryTerms, False)
+    # short answer api
+    # url = f"http://api.wolframalpha.com/v2/result?appid={appID}&i={query}"
+    
+    # full answer api
     
     url = f"http://api.wolframalpha.com/v2/query?appid={keys['walpha']}&input={query}&output=json"
 
@@ -42,10 +46,10 @@ def walpha(queryTerms: List[str]) -> Result:
         response['success'],
         query=' '.join(queryTerms)
     )
-
+    print(result)
     if result.success:
-        for pod in result['pods'][1:]:
-            result.pages.append(
+        for pod in response['pods'][1:]:
+            result.addPage(
                 Page(
                     Color.red(), 
                     image=pod['subpods'][0]['img']['src']

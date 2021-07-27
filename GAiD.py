@@ -16,7 +16,7 @@ if __name__ == '__main__':
     gaid = Bot(command_prefix='g ') 
 
     for ext in ['search', 'modularity']:
-        gaid.load_extension(f'cog.{ext}')
+        gaid.load_extension(f'cogs.{ext}')
 
     # @gaid.command(name='probe')
     # async def probe(context, *args):

@@ -1,8 +1,14 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from discord import Embed, Color
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from discord.embeds import EmptyEmbed
+@dataclass(frozen=True)
+class Page:
+    color: Color
+    title: str = None
+    description: str = None
+    image: str = None
+    fields: List[Dict] = field(default_factory=list)
 
 class Result:
 
@@ -15,15 +21,22 @@ class Result:
             self.query: str = query
             self.pages: List[Page] = pages
 
+    def __repr__(self) -> str:
+        rep = f"Result: \n"
+        rep+= f"\tSuccess: {self.success}\n"
+        if self.success:
+            rep+= f"\tQuery: `{self.query}`"
+            rep+= f"\tPages: {self.pages}"
+        return rep
+
+    def addPage(self, page: Page) -> None:
+        self.pages.append(page)
+
     def getPage(self, index: int) -> Embed:
         # get the `index` page of the embed
 
         if not self.success:
-            return Embed(
-                title="We encountered an error",
-                description="Please try again after some time",
-                color=Color.blue()
-            )
+            return self.showFailurePage()
 
         if index >= len(self.pages):
             raise IndexError(
@@ -40,18 +53,16 @@ class Result:
             embed.description = page.description
 
         if page.image is not None:
-            embed.image = page.image
+            embed.set_image(url=page.image)
         
         for field in page.fields:
             pass
 
         return embed
 
-
-@dataclass(frozen=True)
-class Page:
-    color: Color
-    title: str = None
-    description: str = None
-    image: str = None
-    fields: List[Dict] = []
+    def showFailurePage(self) -> Embed:
+        return Embed(
+            title="We encountered an error",
+            description="Please try again after some time",
+            color=Color.orange()
+        )

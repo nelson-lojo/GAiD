@@ -1,4 +1,4 @@
-from result import Result
+from utils.result import Result
 from typing import Callable, List
 
 
@@ -15,7 +15,7 @@ class Query:
         return f"Query(\"{self.query}\", {self.method.__name__})"
 
     def fulfill(self) -> Result:
-        try:
-            return self.method(self.queryTerms)
-        except:
-            return Result(success=False)
+        # try:
+        return self.method(self.queryTerms)
+        # except:
+            # return Result(success=False)

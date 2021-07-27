@@ -6,6 +6,9 @@ from json import loads
 from uuid import uuid4
 from discord.ext import commands
 from time import time, gmtime, strftime
+from utils.engines import walpha
+from utils.query import Query
+from utils.tools import *
 
 MAX_QUERIES = 100
 
@@ -73,60 +76,37 @@ class Search(commands.Cog):
 
     @commands.command(name='walpha', aliases=['wa', 'wolframalpha'], brief="query Wolfram Alpha", pass_context=True)
     async def walpha(self, context, *queryTerms):
-        appID = 'JUR6W8-5KWA539AR8'
-        # short answer api
-        # query = querify(queryTerms)
-        # url = f"http://api.wolframalpha.com/v2/result?appid={appID}&i={query}"
-        # answer = requests.get(url).text
-        # response = embed(' '.join(queryTerms), answer, discord.Color.red())
         
-        # full answer api
-        
-        query = querify(queryTerms, False)
-        url = f"http://api.wolframalpha.com/v2/query?appid={appID}&input={query}&output=json"
-        result = loads(requests.get(url).text)
-        result = result['queryresult']
+        query = Query(queryTerms, walpha)
+        result = query.fulfill()
 
-        if not result['success']:
-            await context.send(embed=embed(
-                ' '.join(queryTerms), 
-                'There was an error in fulfilling this query, please try again', 
-                discord.Color.red()
-            ))
+        if result.success is False:
+            await context.send(embed=result.showFailurePage())
+            log(f"FAILED walpha request with query: `{' '.join(queryTerms)}`")
             return
-
-        def getPanel(index):
-            assert index > -1, "can only handle non-negative indices"
-            panel = discord.Embed(
-                title=f"Query: {result['inputstring']}",
-                color=discord.Color.red()
-            )
-
-            panel.set_image(url=result['pods'][index + 1]['subpods'][0]['img']['src'])
-            # broken? why?
-            #panel.set_thumbnail(url='https://www.wolframalpha.com/_next/static/images/spikey_3-to7gqW.svg')
-            return panel
         
         index = 0
-        message = await context.send(embed=getPanel(index))
+        message = await context.send(embed=result.getPage(index))
+        if len(result.pages) <= 2:
+            return
+        log(f"LAUNCHING walpha nav handle for query: `{' '.join(queryTerms)}`")
         await message.add_reaction("⬅️")
         await message.add_reaction("➡️")
 
-        isAuthor = lambda reaction, user: user == context.author
+        validate = lambda reaction, user: user == context.author and message == reaction.message
         while True:
                 try:
                     # 30 sec timeout
-                    reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=isAuthor)
+                    reaction, user = await self.bot.wait_for("reaction_add", timeout=30, check=validate)
                     
                     await message.remove_reaction(reaction, user) 
-                    if message == reaction.message:
-                        if reaction.emoji == "⬅️":
-                            # show prev
-                            index -= 1 if index > 0 else 0
-                        elif reaction.emoji == "➡️":
-                            # show next
-                            index += 1 if index < (result['numpods'] - 2) else 0
-                        await message.edit(embed=getPanel(index))
+                    if reaction.emoji == "⬅️":
+                        # show prev
+                        index -= 1 if index > 0 else 0
+                    elif reaction.emoji == "➡️":
+                        # show next
+                        index += 1 if index < (len(result.pages) - 1) else 0
+                    await message.edit(embed=result.getPage(index))
                 except asyncio.TimeoutError: 
                     print(f"DROPPING walpha nav handle for query: `{' '.join(queryTerms)}`")
                     await message.remove_reaction('➡️', self.bot.user)
