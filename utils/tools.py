@@ -1,7 +1,5 @@
-
-
 import asyncio
-from typing import Union
+from typing import Callable, Dict, Union
 from utils.result import Result
 from discord import Message, User, Member
 from discord.ext.commands import Bot
@@ -37,3 +35,24 @@ async def initNav(bot: Bot, message: Message, result: Result, author: Union[User
             await message.remove_reaction('➡️', bot.user)
             await message.remove_reaction('⬅️', bot.user)
             break
+
+def limitExecutions(mappings: Dict) -> Callable[[str, Callable], Result]:
+    dbName = "GAiD.db"
+    # make the table
+    # |  id  |  category  |  insertion date  |  query  |  pages  |
+    # mappings = {
+    #     'cse' : {
+    #         'max' : 100,
+    #         'interval' : timedelta(days=1)
+    #     }
+    # }
+    def check(category: str, func: Callable[[], Result]) -> Result:
+        if category in mappings.keys():
+            pass
+            # select * from limits where limits.category == :category
+            # clear out the old requests
+            # if count < mappings[category][max]
+            #   run
+            # else
+            #   return failure()
+        return None

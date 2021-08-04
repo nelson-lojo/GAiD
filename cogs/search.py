@@ -6,8 +6,7 @@ from json import loads
 from uuid import uuid4
 from discord.ext import commands
 from time import time, gmtime, strftime
-from utils.engines import duck, jisho, walpha, kgraph
-from utils.query import Query
+from utils.engines import WAlphaQuery, DuckQuery, KGraphQuery, JishoQuery
 from utils.tools import initNav, log
 
 MAX_QUERIES = 100
@@ -69,15 +68,14 @@ def embed(query, result=None, color=discord.Color.blue(), count=-1,):
 
 
 class Search(commands.Cog):
-    def __init__(self, bot, cseToken):
+    def __init__(self, bot):
         self.bot = bot
-        self.cseToken = cseToken
         self.chargeableCheck = trackQueries(MAX_QUERIES)
 
     @commands.command(name='walpha', aliases=['wa', 'wolframalpha'], brief="query Wolfram Alpha", pass_context=True)
     async def walpha(self, context, *queryTerms):
         
-        query = Query(queryTerms, walpha)
+        query = WAlphaQuery(queryTerms)
         result = query.fulfill()
 
         await initNav(
@@ -91,12 +89,11 @@ class Search(commands.Cog):
 
         if result.success is False:
             log(f"FAILED walpha request with query: `{' '.join(queryTerms)}`")
-            return
         
     @commands.command(name='duck', aliases=['duckduckgo', 'd'], brief="query DuckDuckGo", pass_context=True)
     async def duckInstantAnswer(self, context, *queryTerms):
         
-        query = Query(queryTerms, duck)
+        query = DuckQuery(queryTerms)
         result = query.fulfill()
 
         await context.send(embed=result.getPage(0))
@@ -104,7 +101,7 @@ class Search(commands.Cog):
     @commands.command(name="kpanel", aliases=['knowledgegraph', 'kgraph', 'kg', 'kp'], brief="query Google's Knowledge Graph", pass_context=True)
     async def kgraph(self, context, *queryTerms):
 
-        query = Query(queryTerms, kgraph)
+        query = KGraphQuery(queryTerms)
         result = query.fulfill()
 
         await context.send(embed=result.getPage(0))
@@ -117,7 +114,7 @@ class Search(commands.Cog):
 
         url = 'https://customsearch.googleapis.com/customsearch/v1'
         content = {
-            'key' : self.cseToken,
+            'key' : 'AIzaSyCtJB-5h7Onbn72PpaaPRY4adsNKcd6CNM',
             'cx' : '15b1428872aa7680b', # Programmable Search Engine ID
             'exactTerms' : ' '.join(required),
             'excludeTerms' : ' '.join(exclude),
@@ -205,6 +202,7 @@ class Search(commands.Cog):
 
     @commands.command(name="page", aliases=['findpage'], brief="query Google to list relevant pages (100 per day)", pass_context=True)
     async def findpage(self, context, *queryTerms):
+
         required = list(filter(lambda term: term[0] == '+', queryTerms))
         exclude = list(filter(lambda term: term[0] == '-', queryTerms))
         normal = list(filter(lambda term: term[0] not in ['+', '-'], queryTerms))
@@ -249,7 +247,7 @@ class Search(commands.Cog):
     @commands.command(name="jisho", aliases=['j'], brief="query jisho.org to get japanese results", pass_context=True)
     async def jisho(self, context, *queryTerms):
 
-        query = Query(queryTerms, jisho)
+        query = JishoQuery(queryTerms)
         result = query.fulfill()
 
         await initNav(
@@ -263,4 +261,4 @@ class Search(commands.Cog):
 
 
 def setup(client):
-    client.add_cog(Search(client, 'AIzaSyCtJB-5h7Onbn72PpaaPRY4adsNKcd6CNM'))
+    client.add_cog(Search(client))

@@ -3,8 +3,6 @@ from discord import Color
 from utils.query import Query
 from utils.result import Result, Page, Field
 from utils.keys import keys
-from requests import get as requestsGet
-from json import loads as jsonLoads
 
 class WAlphaQuery(Query):
 
@@ -197,48 +195,3 @@ class JishoQuery(Query):
 
         return result
 
-class CSEQuery(Query):
-
-    url = 'https://customsearch.googleapis.com/customsearch/v1'
-
-    def __init__(self, queryTerms: List[str]) -> None:
-        super().__init__(queryTerms)
-
-    def _request(self) -> Result:
-        required = list(filter(lambda term: term[0] == '+', self.queryTerms))
-        exclude = list(filter(lambda term: term[0] == '-', self.queryTerms))
-        normal = list(filter(lambda term: term[0] not in ['+', '-'], self.queryTerms))
-
-        content = {
-            'key' : keys['cse'],
-            'cx' : '15b1428872aa7680b', # Programmable Search Engine ID
-            'exactTerms' : ' '.join(required),
-            'excludeTerms' : ' '.join(exclude),
-            'q' : ' '.join(normal),
-        }
-
-        response = requestsGet(CSEQuery.url, content)
-
-        if response.status_code != 200:
-            return Result(success = False, query = self.query, pages = [])
-        
-        return self._parse(jsonLoads(response.text))
-
-
-    def _parse(self, jsonData: Dict) -> Result:
-        data = jsonData['items']
-
-        # construct the list of pages found
-        desc = ""
-        for item in data:
-            desc += f"{data.index(item) + 1}. [{item['displayLink']}]({item['link']})\n"
-        
-        return Result(
-            success = True,
-            query = self.query,
-            pages = [ Page(
-                color = Color.blue(),
-                title = f"Query: {self.query}",
-                description = desc
-            )]
-        )
