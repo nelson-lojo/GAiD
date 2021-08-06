@@ -1,13 +1,16 @@
-from typing import Callable, List
+from typing import List
+from utils.tools.misc import log
 from discord import Embed, Color
 from dataclasses import dataclass, field
+
+from discord.ext.commands.context import Context
 
 @dataclass(frozen=True)
 class Field:
     name: str
     value: str = None
 
-@dataclass(frozen=True)
+@dataclass
 class Page:
     color: Color
     title: str = None
@@ -16,14 +19,19 @@ class Page:
     fields: List[Field] = field(default_factory=list)
     footer: str = None
 
-    def embed(self) -> Embed:
+    def embed(self, number: int = None, total: int = None) -> Embed:
         embed = Embed(
-            title=self.title,
             color=self.color
         )
 
+        if self.title is not None:
+            embed.title = self.title
+
         if self.description is not None:
-            embed.description = self.description
+            if number is not None and total is not None:
+                embed.description = self.description.format(index=f"{number}/{total}")
+            else:
+                embed.description = self.description
 
         if self.image is not None:
             embed.set_image(url=self.image)
@@ -63,6 +71,9 @@ class Result:
             rep+= f"\tPages: {self.pages}"
         return rep
 
+    def _getFailPage(self) -> Embed:
+        return self.fail.embed()
+
     def addPage(self, page: Page) -> None:
         self.pages.append(page)
 
@@ -78,22 +89,10 @@ class Result:
             )
         
         page = self.pages[index]
-        return page.embed()
-        embed = Embed(
-            title=(page.title if page.title is not None else f"Query: {self.query}"),
-            color=page.color
-        )
-        
-        if page.description is not None:
-            embed.description = page.description
+        return page.embed(index + 1, len(self.pages))
 
-        if page.image is not None:
-            embed.set_image(url=page.image)
-        
-        for field in page.fields:
-            embed.add_field(
-                name=field.name,
-                value=field.value
-            )
+    async def showFail(self, context: Context) -> None:
 
-        return embed
+        log(f"FAILED {type(self).__name__} request with query: `{self.query}`")
+
+        await context.send(embed = self._getFailPage())

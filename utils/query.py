@@ -1,5 +1,6 @@
-from utils.result import Result
-from typing import Callable, Dict, List, Tuple
+from discord.colour import Color
+from utils.result import Field, Page, Result
+from typing import Dict, List, Tuple
 from json import loads as jsonLoads
 from requests import get as requestGet
 
@@ -9,11 +10,12 @@ class Query:
         
         self.queryTerms = queryTerms
         self.query = ' '.join(queryTerms)
+        self.url = type(self).url.format(query = self._urlQuery())
 
     def __repr__(self) -> str:
-        return f"Query(\"{self.query}\")"
+        return f"{type(self).__name__}(\"{self.query}\")"
 
-    def _querify(self, terms: List[str], **kwargs) -> str:
+    def _urlQuery(self, **kwargs) -> str:
         mapping: List[Tuple[str]] = [
             ('&', '%26'),
             ('%', '%25'),
@@ -25,7 +27,7 @@ class Query:
         plusJoin: bool      = kwargs.get('plusJoin' , True )
         newTerms: List[str] = []
         
-        for term in terms:
+        for term in self.queryTerms:
             newTerm = term
         
             for m in mapping:
@@ -42,14 +44,20 @@ class Query:
             return "%20".join(newTerms)
 
     def _request(self) -> Result:
-        response = requestGet(
-            type(self).url.format(
-                query = self._querify(self.queryTerms)
-            )
-        )
+        response = requestGet(self.url)
 
         if response.status_code != 200:
-            return Result(success=False, query=self.query, pages=[])
+            return Result(success=False, query=self.query, pages=[],
+                failurePage=Page(
+                    color=Color.orange(),
+                    title = "We encountered a problem",
+                    description= f"{type(self)}: Request failed",
+                    fields=[Field(
+                        name=f"Status code: {response.status_code}",
+                        value=f"{response.text}"
+                    )]
+                )
+            )
         
         return self._parse(jsonLoads(response.text))
 

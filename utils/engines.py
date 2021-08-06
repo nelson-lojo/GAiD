@@ -1,4 +1,6 @@
+from datetime import timedelta
 from typing import Dict, List
+from utils.tracking import Tracker
 from discord import Color
 from utils.query import Query
 from utils.result import Result, Page, Field
@@ -140,9 +142,8 @@ class JishoQuery(Query):
         super().__init__(queryTerms)
 
     # jisho query urls need some chars in the actual query
-    def _querify(self, terms: List[str], **kwargs) -> str:
-        kwargs.update({ 'exclude' : ['#', '"'] })
-        return super()._querify(terms, **kwargs)
+    def _urlQuery(self) -> str:
+        return super()._urlQuery(exclude=['#', '"'])
 
     def _parse(self, jsonData: Dict) -> Result:
         data: Dict = jsonData['data']
@@ -200,22 +201,27 @@ class JishoQuery(Query):
 class CSEQuery(Query):
 
     url = 'https://customsearch.googleapis.com/customsearch/v1'
+    pseID = '15b1428872aa7680b' # Programmable Search Engine ID
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
 
-    def _request(self) -> Result:
+    def _getContent(self) -> Dict:
         required = list(filter(lambda term: term[0] == '+', self.queryTerms))
         exclude = list(filter(lambda term: term[0] == '-', self.queryTerms))
         normal = list(filter(lambda term: term[0] not in ['+', '-'], self.queryTerms))
 
-        content = {
+        return {
             'key' : keys['cse'],
-            'cx' : '15b1428872aa7680b', # Programmable Search Engine ID
+            'cx' : CSEQuery.pseID, 
             'exactTerms' : ' '.join(required),
             'excludeTerms' : ' '.join(exclude),
             'q' : ' '.join(normal),
         }
+
+    @Tracker.limit(count = 100, age = timedelta(days = 1), label = "cse")
+    def _request(self) -> Result:
+        content = self._getContent()
 
         response = requestsGet(CSEQuery.url, content)
 
@@ -228,17 +234,78 @@ class CSEQuery(Query):
     def _parse(self, jsonData: Dict) -> Result:
         data = jsonData['items']
 
-        # construct the list of pages found
+        # construct the list of sites found
         desc = ""
         for item in data:
             desc += f"{data.index(item) + 1}. [{item['displayLink']}]({item['link']})\n"
         
+        # then package it all into a result
         return Result(
             success = True,
             query = self.query,
             pages = [ Page(
                 color = Color.blue(),
-                title = f"Query: {self.query}",
+                title = f"Query ({{count}} today): {self.query}",
                 description = desc
             )]
         )
+
+class CSEImQuery(CSEQuery):
+
+    def __init__(self, queryTerms: List[str]) -> None:
+        super().__init__(queryTerms)
+
+    def _getContent(self) -> Dict:
+        # this will feed into <CSEQuery>'s ._request() and thus be tracked
+        content = super()._getContent()
+        content.update({
+            'searchType' : 'image'
+        })
+        return content
+
+    def _parse(self, jsonData: Dict) -> Result:
+        data: List[Dict] = jsonData['items']
+
+        result: Result = Result(
+            success=True,
+            query = self.query,
+            pages = []
+        )
+        for item in data:
+            result.addPage(
+                Page(
+                    color = Color.blue(),
+                    title = f"Query {{count}}: {self.query}",
+                    description = f"Result {{index}}: {item['snippet']} [{item['displayLink']}]({item['image']['contextLink']})",
+                    image = item['link'],
+                )
+            )
+        
+        return result
+
+class SerpMQuery(Query):
+
+    url = ""
+    def __init__(self, queryTerms: List[str]) -> None:
+        super().__init__(queryTerms)
+
+    @Tracker.limit(count = 250, age = timedelta(days = 30), label = "Serp Master")
+    def _request(self) -> Result:
+        headers = {
+            'Content-Type': 'application/json'
+        }
+
+        content = {
+            'scraper' : 'google_search',
+            'q' : self.query,
+            'parse' : 'true',
+            'access': ''
+        }
+
+        
+
+
+    def _parse(self, jsonData: Dict) -> Result:
+        return super()._parse(jsonData)
+
+        title = f"Query ({{count}} this month): {self.query}"
