@@ -1,23 +1,19 @@
 from discord.ext.commands.context import Context
-from utils.result import Result
 from discord.ext import commands
-from utils.engines import CSEImQuery, CSEQuery, WAlphaQuery, DuckQuery, KGraphQuery, JishoQuery
-from utils.tools.chat import initNav
+import requests as r
 import time
 
+frameRate = 2.5
 
-class BadApple(commands.Cog):
+class Badapple(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-        with open("play.txt", "r") as raw:
+        with open("cogs/play.txt", "r") as raw:
             # frames are 100fps for 220 sec
             frames = raw.read().split("SPLIT")
         
         self.frames = frames
-        
-    async def getFrame(self, timeStamp: float) -> str:
-        return ""
 
     @commands.command(name='bad', aliases=['ba'], brief="Bad Apple!!", pass_context=True)
     async def bad(self, context: Context, *queryTerms):
@@ -25,16 +21,50 @@ class BadApple(commands.Cog):
         thumbnail_frame = 800
         start = time.time() # start time in seconds
 
-        message: Message = await context.send(frames[0])
+        message: Message = await context.send(f"```{self.frames[0]}```")
+        last_frame = 0
         while (tStamp := time.time() - start) < 220.0:
-            frame = int(tStamp * 100)
-            await message.edit(frames[frame])
+            # tStamp is in seconds, frame is tStamp * 100 as an int
+            frame = int(int(tStamp * frameRate) * (100 // frameRate)) 
+            if frame != last_frame:
+                last_frame = frame
+                await message.edit(content=f"```{self.frames[frame]}```")
+                print(f"sent frame at {tStamp} sec")
         
-        await message.edit(frames[thumbnail_frame])
-        await message.add_reaction("🔄")
+        await message.edit(content=self.frames[thumbnail_frame])
+#        await message.add_reaction("🔄")
+
+    @commands.command(name='good', aliases=['play'], brief="Bad Apple!!!", pass_context=True)
+    async def good(self, ctx, *queryTerms):
+        thumbnail_frame = 800
+        webhook = await ctx.channel.create_webhook(name="Bad Apple!!")
+        msg = await webhook.send(content=f"```{self.frames[0]}```", wait=True)
+        url = f"https://discordapp.com/api/webhooks/{webhook.id}/{webhook.token}/messages/{msg.id}"
+        #                                 /webhooks/{webhook.id}/{webhook.token}/messages/{message.id}
+
+        start = time.time()
+        
+        last_frame = 0
+        while (tStamp := time.time() - start) < 220.0:
+            frame = int(int(tStamp * frameRate) * (100 // frameRate))
+            if frame != last_frame:
+                res = r.patch(url, {'content' : f"```{self.frames[frame]}```"})
+                #await msg.edit(content=f"```{self.frames[frame]}```")
+                if res.status_code // 100 < 4:
+                    print(f'Bad Apple!!: Sent frame {frame} at {tStamp}', end='\r')
+                    last_frame = frame
+                else:
+                    print(f'Bad Apple!!: Failed to send frame {frame} at {tStamp} ({res.status_code})')#, end='\r')
+                    print(res.text)
+                    await msg.delete()
+                    await webhook.delete()
+                    return
+        
+        time.sleep(3)
+        await msg.delete()
+        await webhook.delete()
+        print('Bad Apple!!: finished')
 
 
 def setup(client):
-    client.add_cog(Search(client))
-
-
+    client.add_cog(Badapple(client))
