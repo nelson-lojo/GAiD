@@ -1,1 +1,1 @@
-worker: ./runBot.py GAiD.py "$GAID_KEY"
+worker: python3 ./runBot.py GAiD.py "$GAID_KEY"
