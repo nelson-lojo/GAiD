@@ -1,1 +1,1 @@
-web: ./runBot.py GAiD.py "$GAID_KEY"
+worker: ./runBot.py GAiD.py "$GAID_KEY"
