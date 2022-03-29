@@ -110,7 +110,11 @@ class KGraphQuery(Query):
         result: Result = Result(
             success = ( len(jsonData['itemListElement']) > 0 ),
             query = self.query,
-            pages = []
+            pages = [],
+            failurePage = Page(
+                color = Color.blue(),
+                title = f"No result found for query: {self.query}"
+            )
         )
 
         if result.success:
@@ -275,7 +279,7 @@ class CSEImQuery(CSEQuery):
             result.addPage(
                 Page(
                     color = Color.blue(),
-                    title = f"Query {{count}}: {self.query}",
+                    title = f"Query {{count}} today: {self.query}",
                     description = f"Result {{index}}: {item['snippet']} [{item['displayLink']}]({item['image']['contextLink']})",
                     image = item['link'],
                 )
