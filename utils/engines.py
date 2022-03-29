@@ -286,30 +286,3 @@ class CSEImQuery(CSEQuery):
             )
         
         return result
-
-class SerpMQuery(Query):
-
-    url = ""
-    def __init__(self, queryTerms: List[str]) -> None:
-        super().__init__(queryTerms)
-
-    @Tracker.limit(count = 250, age = timedelta(days = 30), label = "Serp Master")
-    def _request(self) -> Result:
-        headers = {
-            'Content-Type': 'application/json'
-        }
-
-        content = {
-            'scraper' : 'google_search',
-            'q' : self.query,
-            'parse' : 'true',
-            'access': ''
-        }
-
-        
-
-
-    def _parse(self, jsonData: Dict) -> Result:
-        return super()._parse(jsonData)
-
-        title = f"Query ({{count}} this month): {self.query}"
