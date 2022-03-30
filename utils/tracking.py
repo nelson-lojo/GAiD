@@ -98,13 +98,13 @@ class Tracker:
         #             )
         #         ).scalar()
         # )
-        count = cls.table.select(sa.func.count('*')). \
+        count = cls.table.select(). \
             where(
                 sa.and_(
                     cls.table.c.label == name,
                     cls.table.c.time > (datetime.now() - age)
                 )
-            ).scalar().execute()
+            ).count().execute()
 
 
         # stmt = sa.select(cls.table). \
