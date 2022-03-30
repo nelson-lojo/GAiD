@@ -9,7 +9,7 @@ from utils.result import Result
 class Tracker:
     
     _dbURL = os.environ.get("DATABASE_URL", f"sqlite://{os.getcwd()}/GAiD-dev.sqlite3")
-    _db = sa.create_engine(_dbURL)
+    _db = sa.create_engine(_dbURL.replace("postgres://", "postgresql://", 1))
 
     init = False
     limits = {}
@@ -105,7 +105,7 @@ class Tracker:
     def addRun(cls, label, arguments, kwarguments) -> None:
         # consider storing search words
         stmt = sa.insert(cls.table).values(label=label, time=datetime.now())
-        
+
         with cls._db.begin() as conn:
             conn.execute(stmt)
 
