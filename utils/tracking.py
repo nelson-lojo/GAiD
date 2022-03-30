@@ -88,16 +88,7 @@ class Tracker:
 
     @classmethod
     def getCountedRuns(cls, name: str, age: timedelta) -> int:
-        # count = cls._db.execute(
-        #     sa.select(sa.func.count('*')). \
-        #         select_from(cls.table). \
-        #         where(
-        #             sa.and_(
-        #                 cls.table.c.label == name,
-        #                 cls.table.c.time > (datetime.now() - age)
-        #             )
-        #         ).scalar()
-        # )
+        
         count = cls.table.select(). \
             where(
                 sa.and_(
@@ -106,26 +97,6 @@ class Tracker:
                 )
             ).execute().rowcount
 
-
-        # stmt = sa.select(cls.table). \
-        #     where(
-        #         sa.and_(
-        #             cls.table.c.label == name,
-        #             cls.table.c.time > (datetime.now() - age)
-        #         )
-        #     ).count()
-
-        # stmt = cls.table.select(sa.func.count()). \
-        #     where(
-        #         sa.and_(
-        #             cls.table.c.label == name,
-        #             cls.table.c.time > (datetime.now() - age)
-        #         )
-        #     ).scalar()
-
-        # with cls._db.begin() as conn:
-        #     count = conn.execute(stmt)
-
         return count
         
 
@@ -133,8 +104,5 @@ class Tracker:
     def addRun(cls, label, arguments, kwarguments) -> None:
         # consider storing search words
         cls.table.insert().values(label=label, time=datetime.now()).execute()
-
-        # with cls._db.connect() as conn:
-        #     conn.execute(stmt)
 
         return
