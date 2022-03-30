@@ -97,16 +97,16 @@ class Tracker:
         #         ).scalar()
         # )
 
+        stmt = cls.table.select(sa.func.count()). \
+            where(
+                sa.and_(
+                    cls.table.c.label == name,
+                    cls.table.c.time > (datetime.now() - age)
+                )
+            ).scalar()
+
         with cls._db.begin() as conn:
-            count = conn.execute(
-                cls.table.select(sa.func.count('*')). \
-                    where(
-                        sa.and_(
-                            cls.table.c.label == name, 
-                            cls.table.c.time > (datetime.now() - age)
-                        )
-                    )
-            )
+            count = conn.execute(stmt)
 
         return count
         
@@ -114,9 +114,9 @@ class Tracker:
     @classmethod
     def addRun(cls, label, arguments, kwarguments) -> None:
         # consider storing search words
-        # cls._db.execute( sa.insert(cls.table).values(label=label, time=datetime.now()) )
+        stmt = cls.table.insert(cls.table).values(label=label, time=datetime.now())
 
         with cls._db.begin() as conn:
-            conn.execute(cls.table.insert(), {"label" : label, "time" : datetime.now() })
+            conn.execute(stmt)
 
         return
