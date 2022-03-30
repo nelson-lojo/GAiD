@@ -17,8 +17,10 @@ class Tracker:
     @classmethod
     def initialize(cls):
         # make the table
+        cls.metaData = sa.MetaData()
+        cls.metaData.bind = cls._db
         cls.table = sa.Table(
-            'queries', sa.MetaData(), 
+            'queries', 
             sa.Column('id', sa.INTEGER, primary_key=True, autoincrement=True), 
             sa.Column('label', sa.TEXT), 
             sa.Column('time', sa.TIMESTAMP, default=sa.func.now())
@@ -96,17 +98,33 @@ class Tracker:
         #             )
         #         ).scalar()
         # )
-
-        stmt = cls.table.select(sa.func.count()). \
+        count = cls.table.select(sa.func.count('*')). \
             where(
                 sa.and_(
                     cls.table.c.label == name,
                     cls.table.c.time > (datetime.now() - age)
                 )
-            ).scalar()
+            ).scalar().execute()
 
-        with cls._db.begin() as conn:
-            count = conn.execute(stmt)
+
+        # stmt = sa.select(cls.table). \
+        #     where(
+        #         sa.and_(
+        #             cls.table.c.label == name,
+        #             cls.table.c.time > (datetime.now() - age)
+        #         )
+        #     ).count()
+
+        # stmt = cls.table.select(sa.func.count()). \
+        #     where(
+        #         sa.and_(
+        #             cls.table.c.label == name,
+        #             cls.table.c.time > (datetime.now() - age)
+        #         )
+        #     ).scalar()
+
+        # with cls._db.begin() as conn:
+        #     count = conn.execute(stmt)
 
         return count
         
@@ -114,9 +132,9 @@ class Tracker:
     @classmethod
     def addRun(cls, label, arguments, kwarguments) -> None:
         # consider storing search words
-        stmt = cls.table.insert(cls.table).values(label=label, time=datetime.now())
+        cls.table.insert().values(label=label, time=datetime.now()).execute()
 
-        with cls._db.begin() as conn:
-            conn.execute(stmt)
+        # with cls._db.connect() as conn:
+        #     conn.execute(stmt)
 
         return
