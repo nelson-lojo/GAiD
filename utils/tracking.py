@@ -1,31 +1,31 @@
+from operator import truediv
 import os
+import sqlalchemy as sa
 from datetime import timedelta
 from datetime import datetime
-import sqlite3
-from sqlite3.dbapi2 import OperationalError
 from typing import Any, Callable
 from utils.result import Result
 
 class Tracker:
     
-    _db = sqlite3.connect('GAiD-dev.sqlite3')
-        #DBWrapper(f"GAiD-{os.getenv('GAID_ENV')}.db")
+    _dbURL = os.environ.get("DATABASE_URL", f"sqlite://{os.getcwd()}/GAiD-dev.sqlite3")
+    _db = sa.create_engine(_dbURL.replace("postgres://", "postgresql://", 1))
+
     init = False
     limits = {}
 
     @classmethod
     def initialize(cls):
         # make the table
-        with cls._db:
-            cur = cls._db.cursor()
-            cur.execute("""
-                CREATE TABLE queries (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    label TEXT,
-                    time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                );
-            """)
-        pass
+        cls.metaData = sa.MetaData()
+        cls.metaData.bind = cls._db
+        cls.table = sa.Table(
+            'queries', cls.metaData,
+            sa.Column('id', sa.INTEGER, primary_key=True, autoincrement=True), 
+            sa.Column('label', sa.TEXT), 
+            sa.Column('time', sa.TIMESTAMP, default=sa.func.now())
+        )
+        cls.table.create(cls._db, checkfirst=True)
 
     @classmethod
     def limit(cls, **kwargs) -> Callable:
@@ -35,10 +35,7 @@ class Tracker:
         """
 
         if not cls.init:
-            try:
-                cls.initialize()
-            except OperationalError:
-                cls.init = True
+            cls.initialize()
 
         def limitUse(method: Callable[[Any], Result]) -> Callable[[Any], Result]:
             """
@@ -91,40 +88,21 @@ class Tracker:
 
     @classmethod
     def getCountedRuns(cls, name: str, age: timedelta) -> int:
-        # raise NotImplementedError
-        with cls._db:
-            cur = cls._db.cursor()
-            
-            count = cur.execute(
-                "SELECT COUNT(time) FROM queries " + \
-                    "WHERE label = :name AND time > :oldest",
-                {
-                    'name' : name,
-                    'oldest' : datetime.now() - age
-                }
-            ).fetchall()[0][0]
+        
+        count = cls.table.select(). \
+            where(
+                sa.and_(
+                    cls.table.c.label == name,
+                    cls.table.c.time > (datetime.now() - age)
+                )
+            ).execute().rowcount
 
         return count
         
 
     @classmethod
     def addRun(cls, label, arguments, kwarguments) -> None:
-        with cls._db:
-            cur = cls._db.cursor()
-            cur.execute(
-                "INSERT INTO queries (label, time) VALUES (:name, :time)",#, :args, :kwargs)",
-                {
-                    'name' : label,
-                    'time' : datetime.now(),
-                    # 'args' : arguments,
-                    # 'kwargs' : kwarguments
-                }
-            )
-            cur.close()
+        # consider storing search words
+        cls.table.insert().values(label=label, time=datetime.now()).execute()
+
         return
-
-
-# class DBWrapper:
-
-#     def __init__(self, dbName) -> None:
-#         pass
