@@ -104,7 +104,7 @@ class Tracker:
                     cls.table.c.label == name,
                     cls.table.c.time > (datetime.now() - age)
                 )
-            ).count().execute()
+            ).execute().rowcount
 
 
         # stmt = sa.select(cls.table). \
