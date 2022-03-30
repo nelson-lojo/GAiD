@@ -20,7 +20,7 @@ class Tracker:
         cls.metaData = sa.MetaData()
         cls.metaData.bind = cls._db
         cls.table = sa.Table(
-            'queries', 
+            'queries', cls.metaData,
             sa.Column('id', sa.INTEGER, primary_key=True, autoincrement=True), 
             sa.Column('label', sa.TEXT), 
             sa.Column('time', sa.TIMESTAMP, default=sa.func.now())
