@@ -3,7 +3,7 @@ from discord.ext import commands
 import requests as r
 import time
 
-frameRate = 2.5
+DEFAULT_FRAMERATE = 2.5
 
 class Badapple(commands.Cog):
     def __init__(self, bot):
@@ -16,7 +16,7 @@ class Badapple(commands.Cog):
         self.frames = frames
 
     @commands.command(name='bad', aliases=['ba'], brief="Bad Apple!!", pass_context=True)
-    async def bad(self, context: Context, *queryTerms):
+    async def bad(self, context: Context, frameRate=DEFAULT_FRAMERATE, *args):
 
         thumbnail_frame = 800
         start = time.time() # start time in seconds
@@ -35,7 +35,7 @@ class Badapple(commands.Cog):
 #        await message.add_reaction("🔄")
 
     @commands.command(name='good', aliases=['play'], brief="Bad Apple!!!", pass_context=True)
-    async def good(self, ctx, *queryTerms):
+    async def good(self, ctx, frameRate=DEFAULT_FRAMERATE, *args):
         thumbnail_frame = 800
         webhook = await ctx.channel.create_webhook(name="Bad Apple!!")
         msg = await webhook.send(content=f"```{self.frames[0]}```", wait=True)
@@ -56,6 +56,14 @@ class Badapple(commands.Cog):
                 else:
                     print(f'Bad Apple!!: Failed to send frame {frame} at {tStamp} ({res.status_code})')#, end='\r')
                     print(res.text)
+                    
+                    try:
+                        res_data = json.loads(res.text)
+                        retry_time = res_data.get('retry_after', None)
+                        await ctx.send(f"Error: {res_data['message']} {'Retry after' + retry_time + 'seconds.' if retry_time else ''}")
+                    except:
+                        await ctx.send(f"Unknown error, contact host to check logs")
+                    
                     await msg.delete()
                     await webhook.delete()
                     return
