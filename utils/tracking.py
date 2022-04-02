@@ -8,7 +8,7 @@ from utils.result import Result
 
 class Tracker:
     
-    _dbURL = os.environ.get("DATABASE_URL", f"sqlite://{os.getcwd()}/GAiD-dev.sqlite3")
+    _dbURL = os.environ.get("DATABASE_URL", f"sqlite:///{os.getcwd()}/GAiD-dev.sqlite3")
     _db = sa.create_engine(_dbURL.replace("postgres://", "postgresql://", 1))
 
     init = False
