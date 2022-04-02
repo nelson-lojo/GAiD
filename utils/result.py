@@ -55,13 +55,14 @@ defaultFail = Page(
 
 class Result:
 
-    def __init__(self, success: bool, query: str = None, pages: List[Page] = [], failurePage: Page = defaultFail) -> None:
+    def __init__(self, success: bool, type: str = "unspecified", query: str = None, pages: List[Page] = [], failurePage: Page = defaultFail) -> None:
         self.success: bool = success
         assert query is not None and isinstance(query, str), "Query must be a string"
         assert isinstance(pages, list), "Must provide a <list> of <Page>s"
         self.query: str = query
         self.pages: List[Page] = pages
         self.fail = failurePage
+        self.type = type
 
     def __repr__(self) -> str:
         rep = f"Result: \n"
@@ -93,6 +94,6 @@ class Result:
 
     async def showFail(self, context: Context) -> None:
 
-        log(f"FAILED {type(self).__name__} request with query: `{self.query}`")
+        log(f"FAILED {self.type} request with query: `{self.query}`")
 
         await context.send(embed = self._getFailPage())

@@ -24,6 +24,7 @@ class WAlphaQuery(Query):
 
         result: Result = Result(
             success = data['success'],
+            type = "walpha",
             query = self.query,
             pages = []
         )
@@ -44,6 +45,7 @@ class WAlphaQuery(Query):
 class DuckQuery(Query):
 
     url = 'https://api.duckduckgo.com/?q={query}&format=json'
+    color = Color.orange()
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
@@ -52,8 +54,13 @@ class DuckQuery(Query):
         data: Dict = jsonData
         result:Result = Result(
             success = (not data['meta']['src_name'] == 'hi there'), # yes, 'hi there' is literally the signal for failure
+            type = "duck",
             query = self.query,
-            pages = []
+            pages = [],
+            failurePage = Page(
+                color = self.__class__.color,
+                title = f"No result found for query: {self.query}"
+            )
         )
 
         if result.success:
@@ -89,9 +96,9 @@ class DuckQuery(Query):
 
             result.addPage(
                 Page(
-                    color=Color.orange(),
-                    title=f"Query: {result.query}",
-                    description=listing
+                    color = self.__class__.color,
+                    title = f"Query: {result.query}",
+                    description = listing
                 )
             )
 
@@ -102,6 +109,8 @@ class KGraphQuery(Query):
     url = 'https://kgsearch.googleapis.com/v1/entities:search?' + \
         f'query={{query}}&key={keys["kgraph"]}&limit=1&indent=True'
 
+    color = Color.blue()
+
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
 
@@ -109,10 +118,11 @@ class KGraphQuery(Query):
 
         result: Result = Result(
             success = ( len(jsonData['itemListElement']) > 0 ),
+            type = "kgraph",
             query = self.query,
             pages = [],
             failurePage = Page(
-                color = Color.blue(),
+                color = self.__class__.color,
                 title = f"No result found for query: {self.query}"
             )
         )
@@ -129,7 +139,7 @@ class KGraphQuery(Query):
             
             result.addPage(
                 Page(
-                    color=Color.blue(),
+                    color=self.__class__.color,
                     title=data['name'],
                     description=data.get('description', None),
                     fields=fields
@@ -155,6 +165,7 @@ class JishoQuery(Query):
 
         result: Result = Result(
             success = bool(len(data)),
+            type = "jisho",
             query = self.query,
             pages = [],
             failurePage = Page(
@@ -207,6 +218,7 @@ class CSEQuery(Query):
 
     url = 'https://customsearch.googleapis.com/customsearch/v1'
     pseID = '15b1428872aa7680b' # Programmable Search Engine ID
+    color = Color.blue()
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
@@ -247,9 +259,10 @@ class CSEQuery(Query):
         # then package it all into a result
         return Result(
             success = True,
+            type = "custom page search",
             query = self.query,
             pages = [ Page(
-                color = Color.blue(),
+                color = self.__class__.color,
                 title = f"Query ({{count}} today): {self.query}",
                 description = desc
             )]
@@ -273,13 +286,14 @@ class CSEImQuery(CSEQuery):
 
         result: Result = Result(
             success=True,
+            type = "custom image search",
             query = self.query,
             pages = []
         )
         for item in data:
             result.addPage(
                 Page(
-                    color = Color.blue(),
+                    color = self.__class__.color,
                     title = f"Query {{count}} today: {self.query}",
                     description = f"Result {{index}}: {item['snippet']} [{item['displayLink']}]({item['image']['contextLink']})",
                     image = item['link'],
@@ -304,6 +318,7 @@ class UDictQuery(Query):
 
         result: Result = Result(
             success = bool(len(data)),
+            type = "urban dictionary",
             query = self.query,
             pages = [],
             failurePage = Page(
