@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 from typing import Dict, List
 from utils.tracking import Tracker
 from discord import Color
@@ -141,6 +141,7 @@ class KGraphQuery(Query):
 class JishoQuery(Query):
 
     url = "https://jisho.org/api/v1/search/words?keyword={query}"
+    color = Color.green()
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
@@ -157,7 +158,7 @@ class JishoQuery(Query):
             query = self.query,
             pages = [],
             failurePage = Page(
-                color = Color.green(),
+                color = self.__class__.color,
                 title = f"No result found for query: {self.query}"
             )
         )
@@ -192,7 +193,7 @@ class JishoQuery(Query):
 
                 result.addPage(
                     Page(
-                        color = Color.green(),
+                        color = self.__class__.color,
                         title = f"Query: {self.query}",
                         description = desc,
                         footer = ' '.join(answer['jlpt'])
@@ -285,4 +286,56 @@ class CSEImQuery(CSEQuery):
                 )
             )
         
+        return result
+
+class UDictQuery(Query):
+    
+    url = 'https://api.urbandictionary.com/v0/define?term={query}'
+    color = Color.from_rgb(0,0,0)
+
+    def __init__(self, queryTerms: List[str]) -> None:
+        super().__init__(queryTerms)
+
+    def _urlQuery(self) -> str:
+        return super()._urlQuery(plusJoin=True)
+
+    def _parse(self, jsonData: Dict) -> Result:
+        data: List[Dict] = jsonData['list']
+
+        result: Result = Result(
+            success = bool(len(data)),
+            query = self.query,
+            pages = [],
+            failurePage = Page(
+                color = self.__class__.color,
+                title = f"No result found for query: {self.query}"
+            )
+        )
+
+        if result.success:
+            numPages: int = len(data)
+            pageNum: int = 1
+            for answer in data:
+                desc: str = f"Result {pageNum}/{numPages}: {answer['word']}\n\n"
+                
+                date = datetime.strptime(answer['written_on'], "%Y-%m-%dT%H:%M:%S.%fZ")
+
+                def clean(string: str) -> str:
+                    return string.replace('[', '').replace(']', '')
+
+                # definition, example, author, link
+                desc += f"{clean(answer['definition'])}\n\n"
+                desc += f"*{clean(answer['example'])}*\n\n"
+                desc += f"**by {answer['author']} on {date.strftime('%c')}**\n"
+                desc += f"[View this result in urban dictionary]({answer['permalink']})"
+
+                result.addPage(
+                    Page(
+                        color = self.__class__.color,
+                        title = f"Query: {self.query}",
+                        description = desc
+                    )
+                )
+                pageNum += 1
+
         return result

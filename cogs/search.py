@@ -1,7 +1,7 @@
 from discord.ext.commands.context import Context
 from utils.result import Result
 from discord.ext import commands
-from utils.engines import CSEImQuery, CSEQuery, WAlphaQuery, DuckQuery, KGraphQuery, JishoQuery
+from utils.engines import CSEImQuery, CSEQuery, UDictQuery, WAlphaQuery, DuckQuery, KGraphQuery, JishoQuery
 from utils.tools.chat import initNav
 
 
@@ -91,6 +91,22 @@ class Search(commands.Cog):
             result = result,
             context = context,
             purpose = "jisho",
+            timeout = 300
+        )
+
+    @commands.command(name="urban", aliases=['ud'], brief="search urban dictionary for definitions", pass_context=True)
+    async def urban(self, context, *queryTerms):
+        result: Result = UDictQuery(queryTerms).fulfill()
+
+        if result.success is False:
+            await result.showFail(context)
+            return
+
+        await initNav(
+            bot = self.bot,
+            result = result,
+            context = context,
+            purpose = "urban dictionary",
             timeout = 300
         )
 
