@@ -18,13 +18,6 @@ if __name__ == '__main__':
     for ext in ['search', 'modularity']:
         gaid.load_extension(f'cogs.{ext}')
 
-    # @gaid.command(name='probe')
-    # async def probe(context, *args):
-    #     auth = context.author
-    #     print(f"Author {type(auth)}: {auth} {auth.mention}")
-    #     for arg in args:
-    #         print (arg)
-
     gaid.run(discordToken)
 
 
