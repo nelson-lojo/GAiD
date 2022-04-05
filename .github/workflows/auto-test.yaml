@@ -1,7 +1,7 @@
 name: auto-test
 on: 
   pull_request:
-    types: [opened, edited, reopened, locked, auto_merge_enabled]
+    types: [opened, edited, reopened, locked, auto_merge_enabled, ready_for_review]
 jobs:
   check-tests:
     runs-on: ubuntu-latest
