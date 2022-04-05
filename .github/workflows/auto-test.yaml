@@ -6,4 +6,4 @@ jobs:
   check-tests:
     runs-on: ubuntu-latest
     steps:
-      - run: python3 -m unittest tests/*
+      - run: python3 -m unittest discover ./tests
