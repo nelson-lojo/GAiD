@@ -1,0 +1,9 @@
+name: auto-test
+on: 
+  pull_request:
+    types: [opened, edited, reopened, locked, auto_merge_enabled]
+jobs:
+  check-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - run: python3 -m unittest tests/*
