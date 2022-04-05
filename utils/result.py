@@ -12,7 +12,7 @@ class Field:
 
 @dataclass
 class Page:
-    color: Color
+    color: Color = None
     title: str = None
     description: str = None
     image: str = None
@@ -29,7 +29,7 @@ class Page:
 
         if self.description is not None:
             if number is not None and total is not None:
-                embed.description = self.description.format(index=f"{number}/{total}")
+                embed.description = self.description.replace('{index}', f"{number}/{total}")
             else:
                 embed.description = self.description
 

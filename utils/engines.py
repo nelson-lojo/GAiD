@@ -175,10 +175,8 @@ class JishoQuery(Query):
         )
 
         if result.success:
-            numPages: int = len(data)
-            pageNum: int = 1
             for answer in data:
-                desc: str = f"Result {pageNum}/{numPages}\n\n"
+                desc: str = f"Result {{index}}\n\n"
                 
                 # put in readings 
                 for form in answer['japanese']:
@@ -210,7 +208,6 @@ class JishoQuery(Query):
                         footer = ' '.join(answer['jlpt'])
                     )
                 )
-                pageNum += 1
 
         return result
 
@@ -328,10 +325,8 @@ class UDictQuery(Query):
         )
 
         if result.success:
-            numPages: int = len(data)
-            pageNum: int = 1
             for answer in data:
-                desc: str = f"Result {pageNum}/{numPages}: {answer['word']}\n\n"
+                desc: str = f"Result {{index}}: {answer['word']}\n\n"
                 
                 date = datetime.strptime(answer['written_on'], "%Y-%m-%dT%H:%M:%S.%fZ")
 
@@ -351,6 +346,5 @@ class UDictQuery(Query):
                         description = desc
                     )
                 )
-                pageNum += 1
 
         return result
