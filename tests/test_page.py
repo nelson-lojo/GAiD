@@ -188,9 +188,3 @@ class PageTests(ut.TestCase):
             if 'footer' in kwargs:
                 embed.set_footer.assert_called()
                 embed.set_footer.assert_called_with(text=self.foot)
-
-            
-
-        
-
-
