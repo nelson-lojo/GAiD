@@ -15,10 +15,6 @@ class Search(commands.Cog):
         
         result: Result = WAlphaQuery(queryTerms).fulfill()
 
-        if result.success is False:
-            await result.showFail(context)
-            return
-
         await initNav(
             bot = self.bot,
             result = result,
@@ -32,10 +28,6 @@ class Search(commands.Cog):
         
         result: Result = DuckQuery(queryTerms).fulfill()
 
-        if result.success is False:
-            await result.showFail(context)
-            return
-
         await context.send(embed = result.getPage(0))
 
     @commands.command(name="kpanel", aliases=['knowledgegraph', 'kgraph', 'kg', 'kp'], brief="query Google's Knowledge Graph", pass_context=True)
@@ -43,20 +35,12 @@ class Search(commands.Cog):
 
         result: Result = KGraphQuery(queryTerms).fulfill()
 
-        if result.success is False:
-            await result.showFail(context)
-            return
-
         await context.send(embed = result.getPage(0))
 
     @commands.command(name='image', aliases=['findimage', 'i'], brief='query Google Images (100 per day)', pass_context=True)
     async def imageSearch(self, context, *queryTerms):
 
         result: Result = CSEImQuery(queryTerms).fulfill()
-        
-        if result.success is False:
-            await result.showFail(context)
-            return
 
         await initNav(
             bot = self.bot,
@@ -71,20 +55,12 @@ class Search(commands.Cog):
 
         result: Result = CSEQuery(queryTerms).fulfill()
 
-        if result.success is False:
-            await result.showFail(context)
-            return
-
         await context.send(embed = result.getPage(0))
 
     @commands.command(name="jisho", aliases=['j'], brief="query jisho.org to get japanese results", pass_context=True)
     async def jisho(self, context, *queryTerms):
 
         result: Result = JishoQuery(queryTerms).fulfill()
-
-        if result.success is False:
-            await result.showFail(context)
-            return
 
         await initNav(
             bot = self.bot,
@@ -96,11 +72,8 @@ class Search(commands.Cog):
 
     @commands.command(name="urban", aliases=['ud'], brief="search urban dictionary for definitions", pass_context=True)
     async def urban(self, context, *queryTerms):
+        
         result: Result = UDictQuery(queryTerms).fulfill()
-
-        if result.success is False:
-            await result.showFail(context)
-            return
 
         await initNav(
             bot = self.bot,

@@ -10,6 +10,8 @@ async def initNav(bot: Bot, result: Result, context: Context, purpose: str = "",
     index = 0
     
     message: Message = await context.send(embed=result.getPage(index))
+    if not result.success:
+        return
     
     author: Union[User, Member] = context.author
 

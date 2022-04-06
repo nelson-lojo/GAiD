@@ -1,4 +1,5 @@
-from typing import List
+from multiprocessing.sharedctypes import Value
+from typing import List, Type
 from utils.tools.misc import log
 from discord import Embed, Color
 from dataclasses import dataclass, field
@@ -55,14 +56,25 @@ defaultFail = Page(
 
 class Result:
 
-    def __init__(self, success: bool, type: str = "unspecified", query: str = None, pages: List[Page] = [], failurePage: Page = defaultFail) -> None:
-        self.success: bool = success
-        assert query is not None and isinstance(query, str), "Query must be a string"
-        assert isinstance(pages, list), "Must provide a <list> of <Page>s"
-        self.query: str = query
-        self.pages: List[Page] = pages
-        self.fail = failurePage
-        self.type = type
+    def __init__(self, success: bool, type: str = "unspecified", query: str = None, 
+                    pages: List[Page] = [], failurePage: Page = defaultFail) -> None:
+        primitive_args = {
+            'success' : [success, bool],
+            'type' : [type, str],
+            'query' : [query, str],
+            'pages' : [pages, list],
+        }
+
+        for arg, value in primitive_args.items():
+            if value[0] is None:
+                raise ValueError(f"Argument {arg} cannot be None")
+            if not isinstance(value[0], value[1]):
+                raise TypeError(f"Argument {arg} must be type {value[1]}. Got: {type(value[0])}")
+            setattr(self, arg, value[0])
+
+        if failurePage is None:
+            raise ValueError(f"Argument failurePage cannot be None")
+        self.fail: Page = failurePage
 
     def __repr__(self) -> str:
         rep = f"Result: \n"
@@ -73,6 +85,7 @@ class Result:
         return rep
 
     def _getFailPage(self) -> Embed:
+        log(f"FAILED {self.type} request with query: `{self.query}`")
         return self.fail.embed()
 
     def addPage(self, page: Page) -> None:
@@ -82,7 +95,7 @@ class Result:
         # get the `index` page of the embed
 
         if not self.success:
-            return self.fail.embed()
+            return self._getFailPage()
 
         if index >= len(self.pages):
             raise IndexError(
@@ -92,8 +105,3 @@ class Result:
         page = self.pages[index]
         return page.embed(index + 1, len(self.pages))
 
-    async def showFail(self, context: Context) -> None:
-
-        log(f"FAILED {self.type} request with query: `{self.query}`")
-
-        await context.send(embed = self._getFailPage())
