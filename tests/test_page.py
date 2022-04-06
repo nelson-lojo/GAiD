@@ -1,9 +1,9 @@
 import dataclasses
-from random import randint, randrange
+from random import randint
 import unittest as ut
 from unittest.mock import PropertyMock, patch, MagicMock, call
 from utils.result import Field, Page
-from discord import Embed, Color
+from discord import Color
 
 class FieldTests(ut.TestCase):
 
