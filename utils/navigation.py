@@ -44,7 +44,7 @@ class Navigator:
         if self.results.get(emoji, None) is None:
             self.results[emoji] = self.queries[emoji].fulfill()
         
-        if not self.results[emoji].success:
+        if not self.results[emoji].success and emoji in self.queries.keys():
             self.queries.pop(emoji)
 
         return self.results[emoji]
