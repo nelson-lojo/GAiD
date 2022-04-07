@@ -83,6 +83,21 @@ class Search(commands.Cog):
             timeout = 300
         )
 
+    @commands.command(name="search", aliases=['s'], brief="Search all engines", pass_context=True)
+    async def search(self, context, *queryTerms):
+        from utils.navigation import Navigator
+        nav = Navigator(
+            self.bot, [
+                KGraphQuery(queryTerms),
+                WAlphaQuery(queryTerms),
+                DuckQuery(queryTerms),
+                CSEQuery(queryTerms),
+                CSEImQuery(queryTerms),
+                JishoQuery(queryTerms),
+                UDictQuery(queryTerms)
+            ], "Search", 3000)
+        
+        await nav.send(context)
 
 def setup(client):
     client.add_cog(Search(client))

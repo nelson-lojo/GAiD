@@ -36,7 +36,7 @@ async def initNav(bot: Bot, result: Result, context: Context, purpose: str = "",
         except asyncio.TimeoutError:
             if purpose != '':
                 purpose += ' '
-            log(f"DROPPING {purpose} nav handle for query: {result.query}")
+            log(f"DROPPING {purpose}nav handle for query: {result.query}")
             await message.remove_reaction('➡️', bot.user)
             await message.remove_reaction('⬅️', bot.user)
             break

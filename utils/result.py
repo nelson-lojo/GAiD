@@ -88,6 +88,9 @@ class Result:
         log(f"FAILED {self.type} request with query: `{self.query}`")
         return self.fail.embed()
 
+    def numPages(self) -> int:
+        return len(self.pages)
+
     def addPage(self, page: Page) -> None:
         self.pages.append(page)
 
