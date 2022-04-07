@@ -5,15 +5,6 @@ from utils.tools.misc import log
 from discord import Message, User, Member
 from discord.ext.commands import Bot, Context
 
-# get pge 0 of query 0
-# show it
-# add reactions
-# watch for added reactions
-    # if our guy, change embed AND reactions
-    # reset timeout
-
-
-
 class Navigator:
 
     def __init__(self, bot: Bot, queries: List[Query], 
@@ -49,6 +40,9 @@ class Navigator:
         if self.results.get(emoji, None) is None:
             self.results[emoji] = self.queries[emoji].fulfill()
         
+        if not self.results[emoji].success:
+            self.queries.pop(emoji)
+
         return self.results[emoji]
 
     async def add_reactions(self):
