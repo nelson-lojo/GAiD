@@ -91,11 +91,11 @@ class Search(commands.Cog):
                 KGraphQuery(queryTerms),
                 WAlphaQuery(queryTerms),
                 DuckQuery(queryTerms),
+                JishoQuery(queryTerms),
+                UDictQuery(queryTerms),
                 CSEQuery(queryTerms),
                 CSEImQuery(queryTerms),
-                JishoQuery(queryTerms),
-                UDictQuery(queryTerms)
-            ], "Search", 3000)
+            ], "Search", 300)
         
         await nav.send(context)
 

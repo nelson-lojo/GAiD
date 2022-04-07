@@ -24,10 +24,14 @@ class Navigator:
         
     async def send(self, context: Context):
         self.author: Union[User, Member] = context.author
-        self.message: Message = await context.send(
-            embed=self._get_result(self.query_order[0].emoji).getPage(0))
+        index = 0
+        result = self._get_result(self.query_order[index].emoji)
+        while not result.success:
+            index += 1
+            result = self._get_result(self.query_order[index].emoji)
+        self.message: Message = await context.send(embed=result.getPage(0))
 
-        self.current_res = self.query_order[0].emoji
+        self.current_res = self.query_order[index].emoji
         self.page_number = 0
 
         await self.add_reactions()
@@ -73,8 +77,8 @@ class Navigator:
 
     async def update_embed(self, reaction):
 
-        if reaction.emoji == "⬅️": self.page_number -= 1 # if self.page_number > 0 else 0
-        elif reaction.emoji == "➡️": self.page_number += 1 # if self.page_number + 1 < len(self._get_result(self.current_res).pages) else 0
+        if reaction.emoji == "⬅️": self.page_number -= 1 
+        elif reaction.emoji == "➡️": self.page_number += 1 
         elif str(reaction.emoji) in self.results.keys(): 
             self.current_res = str(reaction.emoji)
             self.page_number = 0
