@@ -11,6 +11,8 @@ class Query:
         self.queryTerms = queryTerms
         self.query = ' '.join(queryTerms)
         self.url = type(self).url.format(query = self._urlQuery())
+        if hasattr(type(self), 'emoji'):
+            self.emoji = type(self).emoji
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}(\"{self.query}\")"

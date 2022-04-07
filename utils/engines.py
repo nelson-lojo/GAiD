@@ -11,6 +11,7 @@ from json import loads as jsonLoads
 class WAlphaQuery(Query):
 
     url = f"http://api.wolframalpha.com/v2/query?appid={keys['walpha']}&input={{query}}&output=json"
+    emoji = '<:walpha:961460932272345148>'
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
@@ -46,6 +47,7 @@ class DuckQuery(Query):
 
     url = 'https://api.duckduckgo.com/?q={query}&format=json'
     color = Color.orange()
+    emoji = '<:duckduck:961460967475138603>'
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
@@ -108,7 +110,7 @@ class KGraphQuery(Query):
 
     url = 'https://kgsearch.googleapis.com/v1/entities:search?' + \
         f'query={{query}}&key={keys["kgraph"]}&limit=1&indent=True'
-
+    emoji = '<:google:961460823778271292>'
     color = Color.blue()
 
     def __init__(self, queryTerms: List[str]) -> None:
@@ -152,6 +154,7 @@ class JishoQuery(Query):
 
     url = "https://jisho.org/api/v1/search/words?keyword={query}"
     color = Color.green()
+    emoji = '<:jisho:961460904074051644>'
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
@@ -216,6 +219,7 @@ class CSEQuery(Query):
     url = 'https://customsearch.googleapis.com/customsearch/v1'
     pseID = '15b1428872aa7680b' # Programmable Search Engine ID
     color = Color.blue()
+    emoji = '<:gsearch:961462326966509579>'
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
@@ -267,6 +271,8 @@ class CSEQuery(Query):
 
 class CSEImQuery(CSEQuery):
 
+    emoji = '<:gimages:961462300945035314>'
+
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
 
@@ -303,6 +309,7 @@ class UDictQuery(Query):
     
     url = 'https://api.urbandictionary.com/v0/define?term={query}'
     color = Color.from_rgb(0,0,0)
+    emoji = '<:urban:961460875309498428>'
 
     def __init__(self, queryTerms: List[str]) -> None:
         super().__init__(queryTerms)
