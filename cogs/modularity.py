@@ -42,10 +42,14 @@ class Modularity(commands.Cog):
 
     async def allowed(self, user: discord.User):
         # condition: `usr is owner`` or `usr in authorized_table`
-        return str(user) == Modularity.owner or \
-                self.table.select().where(
-                    self.table.c.discord_user_id == str(user.id)
-                    ).execute().rowcount > 1 
+        is_owner = str(user) == Modularity.owner 
+        same_users = self.table.select().where(
+            self.table.c.discord_user_id == str(user.id)
+        ).execute()
+
+        print(is_owner)
+        print(same_users)
+        return is_owner or same_users.rowcount > 1
 
     @commands.command(name='load', aliases=['lm'], brief='Load a module', pass_context=True)
     async def loadCog(self, context, *cogs):
