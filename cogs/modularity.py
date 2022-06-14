@@ -1,4 +1,4 @@
-from typing import List
+from typing import Iterable, List
 import sqlalchemy as sa
 from utils.keys import keys
 import discord
@@ -18,7 +18,8 @@ class Modularity(commands.Cog):
         md.bind = Modularity.db
         self.table = sa.Table(
             'modularity-authorized', md,
-            sa.Column('name', sa.TEXT, primary_key=True)
+            sa.Column('name', sa.TEXT),
+            sa.Column('id', sa.TEXT, primary_key=True)
         )
         self.table.create(Modularity.db, checkfirst=True)
 
@@ -39,11 +40,11 @@ class Modularity(commands.Cog):
         s = 's' if len(cogList) > 1 else ''
         await context.send(message.format(s=s, lst=string))
 
-    async def allowed(self, user):
+    async def allowed(self, user: discord.User):
         # condition: `usr is owner`` or `usr in authorized_table`
         return str(user) == Modularity.owner or \
                 self.table.select().where(
-                    self.table.c.name == str(user)
+                    self.table.c.id == user.id
                     ).execute().rowcount > 1 
 
     @commands.command(name='load', aliases=['lm'], brief='Load a module', pass_context=True)
@@ -109,12 +110,12 @@ class Modularity(commands.Cog):
             await context.send(f"**You are not authorized**")
             return
 
-        users = await self.getUsers(mentions)
+        users: Iterable[discord.User] = await self.getUsers(mentions)
         added, already = [], []
 
         for user in users: 
             try:
-                self.table.insert().values(name=user).execute()
+                self.table.insert().values(name=user.name, id=user.id).execute()
                 added.append(user)
             except sa.exc.IntegrityError:
                 already.append(user)
@@ -130,10 +131,10 @@ class Modularity(commands.Cog):
             await context.send(f"**You are not authorized**")
             return
 
-        users = await self.getUsers(mentions)
+        users: List[discord.User] = await self.getUsers(mentions)
 
         for user in users: 
-            self.table.delete().where(self.table.c.name == user).execute()
+            self.table.delete().where(self.table.c.id == user.id).execute()
 
         await Modularity.sendListMessage(context, "*User{s} {lst} now not authorized*", users)
 

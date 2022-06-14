@@ -1,5 +1,4 @@
-from multiprocessing.sharedctypes import Value
-from typing import List, Type
+from typing import List
 from utils.tools.misc import log
 from discord import Embed, Color
 from dataclasses import dataclass, field

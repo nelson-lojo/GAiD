@@ -1,6 +1,5 @@
-
-from utils.keys import keys
 import sqlalchemy as sa
+from utils.keys import keys
 from datetime import timedelta
 from datetime import datetime
 from typing import Any, Callable
@@ -9,8 +8,6 @@ from utils.result import Result
 class Tracker:
     
     _db = sa.create_engine(keys['db'])
-
-    init = False
     limits = {}
 
     @classmethod
@@ -33,8 +30,7 @@ class Tracker:
             to `count: int` times per `age: timedelta` under `label: str`
         """
 
-        if not cls.init:
-            cls.initialize()
+        cls.initialize()
 
         def limitUse(method: Callable[[Any], Result]) -> Callable[[Any], Result]:
             """
@@ -97,7 +93,6 @@ class Tracker:
             ).execute().rowcount
 
         return count
-        
 
     @classmethod
     def addRun(cls, label, arguments, kwarguments) -> None:
