@@ -47,8 +47,9 @@ class Modularity(commands.Cog):
             self.table.c.discord_user_id == str(user.id)
         ).execute()
 
-        print(is_owner)
-        print(same_users)
+        print(f"owner: {is_owner}")
+        print(f"matching users: {same_users}")
+        print(f"matching users (list): {list(same_users)}")
         return is_owner or same_users.rowcount > 1
 
     @commands.command(name='load', aliases=['lm'], brief='Load a module', pass_context=True)
