@@ -50,7 +50,8 @@ class Modularity(commands.Cog):
         print(f"owner: {is_owner}")
         print(f"matching users: {same_users}")
         print(f"matching users (list): {list(same_users)}")
-        return is_owner or same_users.rowcount > 1
+        print(f"rowcount: {same_users.rowcount}")
+        return is_owner or same_users.rowcount > 0
 
     @commands.command(name='load', aliases=['lm'], brief='Load a module', pass_context=True)
     async def loadCog(self, context, *cogs):
