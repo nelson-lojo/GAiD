@@ -19,7 +19,7 @@ class Modularity(commands.Cog):
         self.table = sa.Table(
             'modularity-authorized', md,
             sa.Column('name', sa.TEXT),
-            sa.Column('id', sa.TEXT, primary_key=True)
+            sa.Column('uid', sa.TEXT, primary_key=True)
         )
         self.table.create(Modularity.db, checkfirst=True)
 
@@ -44,7 +44,7 @@ class Modularity(commands.Cog):
         # condition: `usr is owner`` or `usr in authorized_table`
         return str(user) == Modularity.owner or \
                 self.table.select().where(
-                    self.table.c.id == user.id
+                    self.table.c.uid == user.id
                     ).execute().rowcount > 1 
 
     @commands.command(name='load', aliases=['lm'], brief='Load a module', pass_context=True)
@@ -115,7 +115,7 @@ class Modularity(commands.Cog):
 
         for user in users: 
             try:
-                self.table.insert().values(name=user.name, id=user.id).execute()
+                self.table.insert().values(name=user.name, uid=user.id).execute()
                 added.append(user)
             except sa.exc.IntegrityError:
                 already.append(user)
@@ -134,7 +134,7 @@ class Modularity(commands.Cog):
         users: List[discord.User] = await self.getUsers(mentions)
 
         for user in users: 
-            self.table.delete().where(self.table.c.id == user.id).execute()
+            self.table.delete().where(self.table.c.uid == user.id).execute()
 
         await Modularity.sendListMessage(context, "*User{s} {lst} now not authorized*", users)
 
