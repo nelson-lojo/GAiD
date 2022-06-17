@@ -6,7 +6,6 @@ from utils.navigation import Navigator
 class Search(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        # self.chargeableCheck = trackQueries(MAX_QUERIES)
 
     @commands.command(name='walpha', aliases=['wa', 'wolframalpha'], brief="query Wolfram Alpha", pass_context=True)
     async def walpha(self, context: Context, *queryTerms):
