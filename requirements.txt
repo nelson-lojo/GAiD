@@ -3,3 +3,4 @@ async-timeout
 requests
 psycopg2-binary
 sqlalchemy
+apscheduler
