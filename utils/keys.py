@@ -6,4 +6,5 @@ keys = {
     "db"     : environ.get("DATABASE_URL", 
                            f"sqlite:///{getcwd()}/GAiD-dev.sqlite3").
                            replace("postgres://", "postgresql://", 1),
+    "prefix" : 'g ' if environ.get("GAiD_ENV", None) in ("prod", "production") else 'm '
 }
