@@ -23,10 +23,11 @@ class Navigator:
         self.timeout: int = timeout
         
     async def send(self, context: Context):
+        """send the initial message to the channel requested by the user"""
         self.author: Union[User, Member] = context.author
         index = 0
         result = self._get_result(self.query_order[index].emoji)
-        while not result.success:
+        while (not result.success) and len(self.query_order) > index + 1:
             index += 1
             result = self._get_result(self.query_order[index].emoji)
         self.message: Message = await context.send(embed=result.getPage(0))
@@ -38,9 +39,11 @@ class Navigator:
         await self.watch()
 
     def _check(self, reaction, user):
+        """verify that we only change the displayed page if the uuser that requests is correct"""
         return user == self.author and reaction.message == self.message
 
     def _get_result(self, emoji: str) -> Result:
+        """allow user to request another query by reacting with another emoji"""
         if self.results.get(emoji, None) is None:
             self.results[emoji] = self.queries[emoji].fulfill()
         
@@ -50,6 +53,7 @@ class Navigator:
         return self.results[emoji]
 
     async def add_reactions(self):
+        """reset the emoji reactions on the message"""
         if self.page_number > 0:
             await self.message.add_reaction("⬅️")
         if self.page_number + 1 < self._get_result(self.current_res).numPages():
