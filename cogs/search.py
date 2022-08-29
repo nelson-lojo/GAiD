@@ -12,7 +12,7 @@ class Search(commands.Cog):
         nav = Navigator(self.bot, [WAlphaQuery(queryTerms)], "walpha", 180)
         await nav.send(context)
 
-    @commands.command(name='duck', aliases=['duckduckgo', 'd'], brief="query DuckDuckGo", pass_context=True)
+    @commands.command(name='duck', aliases=['duckduckgo'], brief="query DuckDuckGo", pass_context=True)
     async def duckInstantAnswer(self, context, *queryTerms):
         nav = Navigator(self.bot, [DuckQuery(queryTerms)], "duckduckgo", 1)
         await nav.send(context)
@@ -32,16 +32,6 @@ class Search(commands.Cog):
         nav = Navigator(self.bot, [CSEQuery(queryTerms)], "google", 1)
         await nav.send(context)
 
-    @commands.command(name="jisho", aliases=['j'], brief="query jisho.org to get japanese results", pass_context=True)
-    async def jisho(self, context, *queryTerms):
-        nav = Navigator(self.bot, [JishoQuery(queryTerms)], "jisho", 180)
-        await nav.send(context)
-
-    @commands.command(name="urban", aliases=['ud'], brief="search urban dictionary for definitions", pass_context=True)
-    async def urban(self, context, *queryTerms):
-        nav = Navigator(self.bot, [UDictQuery(queryTerms)], "urban dictionary", 180)
-        await nav.send(context)
-
     @commands.command(name="search", aliases=['s'], brief="Search all engines", pass_context=True)
     async def search(self, context, *queryTerms):
         nav = Navigator(
@@ -49,8 +39,6 @@ class Search(commands.Cog):
                 KGraphQuery(queryTerms),
                 WAlphaQuery(queryTerms),
                 DuckQuery(queryTerms),
-                JishoQuery(queryTerms),
-                UDictQuery(queryTerms),
                 CSEImQuery(queryTerms),
                 CSEQuery(queryTerms),
             ], "Search", 180)

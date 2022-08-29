@@ -355,3 +355,63 @@ class UDictQuery(Query):
                 )
 
         return result
+
+
+class MerriamWebsterDict(Query):
+
+    url = f"https://www.dictionaryapi.com/api/v3/references/collegiate/json/{{query}}?key={keys['webster']}"
+    color = Color.blue() # TODO: double check this
+    emoji = "" # TODO: make one
+
+    def __init__(self, queryTerms: List[str]) -> None:
+        super().__init__(queryTerms)
+    
+    def _urlQuery(self) -> str:
+        return super()._urlQuery(plusJoin=True)
+
+    def _parse(self, jsonData: Dict) -> Result:
+        data: List[Dict] = jsonData['list']
+
+        result: Result = Result(
+            success = bool(len(data)),
+            type = "Webster",
+            query = self.query,
+            pages = [],
+            failurePage = Page(
+                color = self.__class__.color,
+                title = f"No result found for query: {self.query}"
+            )
+        )
+
+        if result.success:
+            for def_data in data:
+                desc: str = f"Result {{index}}\n\n"
+
+                desc += f"{def_data['meta']['id']} - {def_data['fl']}" 
+                desc += ", *derogatory*" if def_data['meta']['offensive'] else ""
+                desc += '\n'
+
+                for index, def_ in enumerate(def_data['shortdef']):
+                    desc += f"\n{index}. {def_}"
+                
+                desc += "\n\n"
+                desc += f"[View this result in Webster](https://www.merriam-webster.com/dictionary/{self.query.replace(' ', '+')})"
+
+                result.addPage(
+                    Page(
+                        color = self.__class__.color,
+                        title = f"Query: {self.query}",
+                        description = desc,
+                    )
+                )
+                # def_data['meta']
+                # def_data['hwi']
+                # def_data['fl']
+                # def_data['ins']
+                # def_data['def']
+                # def_data['uros']
+                # def_data['et']
+                # def_data['date']
+                # def_data['shortdef']
+
+        return result
