@@ -1,6 +1,6 @@
 from discord.ext.commands.context import Context
 from discord.ext import commands
-from utils.engines import CSEImQuery, CSEQuery, UDictQuery, WAlphaQuery, DuckQuery, KGraphQuery, JishoQuery
+from utils.engines import CSEImQuery, CSEQuery, WAlphaQuery, DuckQuery, KGraphQuery
 from utils.navigation import Navigator
 
 class Search(commands.Cog):
