@@ -37,8 +37,14 @@ def scale(size: int) -> int:
 sched = BlockingScheduler()
 
 schedule = {
-    3  : 0,
-    10 : 1
+    2  : 0,
+    7  : 1,
+
+    11 : 0,
+    12 : 1,
+    
+    1  : 0,
+    2  : 1
 }
 
 for hour, amount in schedule.items():
