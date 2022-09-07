@@ -19,5 +19,5 @@ class Testing(cmds.Cog):
     async def getUser(self, context):
         print(context.author.avatar)
 
-def setup(bot):
-    bot.add_cog(Testing(bot))
+async def setup(bot):
+    await bot.add_cog(Testing(bot))

@@ -74,5 +74,5 @@ class Badapple(commands.Cog):
         print('Bad Apple!!: finished')
 
 
-def setup(client):
-    client.add_cog(Badapple(client))
+async def setup(client):
+    await client.add_cog(Badapple(client))
