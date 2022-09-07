@@ -4,6 +4,7 @@ from utils.result import Result
 from utils.tools.misc import log
 from discord import Message, User, Member
 from discord.ext.commands import Bot, Context
+from asyncio.exceptions import TimeoutError
 
 class Navigator:
 
