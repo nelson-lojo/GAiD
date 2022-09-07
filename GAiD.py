@@ -8,7 +8,9 @@ if __name__ == '__main__':
     discordToken = argv[1]
 
     prefix = keys['prefix']
-    gaid = Bot(command_prefix=prefix, intents=discord.Intents.default()) 
+    intent = discord.Intents.default()
+    intent.message_content = True
+    gaid = Bot(command_prefix=prefix, intents=intent) 
 
     for ext in ['search', 'modularity']:
         gaid.load_extension(f'cogs.{ext}')
