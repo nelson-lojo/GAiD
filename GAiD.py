@@ -2,6 +2,7 @@ from utils.keys import keys
 from sys import argv
 from discord.ext.commands import Bot
 import discord
+import asyncio
 
 if __name__ == '__main__':
 
@@ -13,7 +14,7 @@ if __name__ == '__main__':
     gaid = Bot(command_prefix=prefix, intents=intent) 
 
     for ext in ['search', 'modularity']:
-        gaid.load_extension(f'cogs.{ext}')
+        asyncio.run(gaid.load_extension(f'cogs.{ext}'))
 
     gaid.run(discordToken)
 
