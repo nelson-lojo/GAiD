@@ -1,4 +1,9 @@
 {
     "deno.enable": true,
-    "deno.config": "./deno.jsonc"
+    "deno.config": "./deno.jsonc",
+    "editor.detectIndentation": false,
+    "editor.indentSize": 4,
+    "[dockercompose]": {
+        "editor.detectIndentation": false
+    }
 }

@@ -5,34 +5,16 @@
     "dockerFile": "Dockerfile",
     // Set *default* container specific settings.json values on container create.
     "settings": {
-        "terminal.integrated.defaultProfile.linux": "/bin/bash",
+        // "terminal.integrated.defaultProfile.linux": "/bin/bash",
         "deno.enable": true,
-        "editor.defaultFormatter": "denoland.vscode-deno",
-        "editor.minimap.enabled": false,
-        "editor.wordWrap": "on",
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": true,
-            "source.fixAll": true
-        },
-        "editor.fontSize": 16,
-        "workbench.colorTheme": "Material Theme Darker",
-        "workbench.iconTheme": "eq-material-theme-icons-darker",
-        "breadcrumbs.enabled": true,
-        "editor.renderWhitespace": "all",
-        "editor.suggestSelection": "first",
-        "editor.formatOnSave": true,
-        "files.autoSave": "afterDelay",
-        "editor.fontFamily": "Fira Code, Menlo, Monaco, 'Courier New', monospace",
+        "editor.indentSize": 4,
+        "files.autoSave": "onFocusChange",
         "typescript.updateImportsOnFileMove.enabled": "always",
         "javascript.updateImportsOnFileMove.enabled": "always"
     },
     // Add the IDs of extensions you want installed when the container is created.
     "extensions": [
-        "denoland.vscode-deno",
-        "pkief.material-icon-theme",
-        "coenraads.bracket-pair-colorizer",
-        "equinusocio.vsc-material-theme",
-        "tabnine.tabnine-vscode"
+        "denoland.vscode-deno"
     ],
     // Use 'forwardPorts' to make a list of ports inside the container available locally.
     // "forwardPorts": [],

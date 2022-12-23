@@ -1,12 +1,8 @@
-import {
-    rest,
-    setApplicationId,
-    upsertSlashCommands,
-} from "discordeno/mod.ts";
+import { rest, setApplicationId, upsertSlashCommands } from "./deps.ts";
 
 import { decode } from "encoding/base64url.ts";
 import { json } from "sift/mod.ts";
-  
+
 import { commands } from "commands/mod.ts";
 
 export async function redeploy(request: Request) {
@@ -20,14 +16,14 @@ export async function redeploy(request: Request) {
     await updateGlobalCommands();
     return json({ success: true });
 }
-  
+
 export async function updateGlobalCommands() {
     const token = Deno.env.get("DISCORD_TOKEN");
     rest.token = `Bot ${token}`;
     setApplicationId(
         new TextDecoder().decode(decode(token?.split(".")[0] || "")) || "",
     );
-  
+
     // UPDATE GLOBAL COMMANDS
     await upsertSlashCommands(
         Object.entries(commands)
@@ -54,7 +50,7 @@ export async function updateGlobalCommands() {
             ),
     );
 }
-  
+
 export async function updateGuildCommands(guildId: string) {
     // GUILD RELATED COMMANDS
     await upsertSlashCommands(
@@ -63,32 +59,32 @@ export async function updateGuildCommands(guildId: string) {
             .filter(([_name, command]) => command!.guild !== false).map(
                 ([name, command]) => {
                     // USER OPTED TO USE BASIC VERSION ONLY
-                    if (command!.advanced === false) {
-                        return {
-                            name,
-                            description: command!.description || "No description available.",
-                            options: command!.options,
-                        };
-                    }
+                    // if (command!.advanced === false) {
+                    return {
+                        name,
+                        description: command!.description || "No description available.",
+                        options: command!.options,
+                    };
+                    // }
   
                     // ADVANCED VERSION WILL ALLOW TRANSLATION
                     // const translatedName = `${name.toUpperCase()}_NAME`;
                     // const translatedDescription = `${name.toUpperCase()}_DESCRIPTION`;
   
-                    return {
-                        name: name,
-                        description: command!.description,
-                        options: command!.options?.map((option) => {
-                            const optionName = option.name;
-                            const optionDescription = option.description;
+                    // return {
+                    //     name: name,
+                    //     description: command!.description,
+                    //     options: command!.options?.map((option) => {
+                    //         const optionName = option.name;
+                    //         const optionDescription = option.description;
             
-                            return {
-                                ...option,
-                                name: optionName,
-                                description: optionDescription || "No description available.",
-                            };
-                        }),
-                    };
+                    //         return {
+                    //             ...option,
+                    //             name: optionName,
+                    //             description: optionDescription || "No description available.",
+                    //         };
+                    //     }),
+                    // };
                 },
             ),
     );

@@ -1,9 +1,10 @@
 {
-    "imports": {
-      "sift/": "https://deno.land/x/sift@0.4.2/",
-      "discordeno/": "https://deno.land/x/discordeno@16.0.0/",
-      "encoding/": "https://deno.land/std@0.156.0/encoding/",
-      "utils/" : "./utils/",
-      "commands/" : "./commands/"
-    }
+  "imports": {
+    "sift/": "https://deno.land/x/sift@0.6.0/",
+    "discordeno/": "https://deno.land/x/discordeno@16.0.0/",
+    "encoding/": "https://deno.land/std@0.156.0/encoding/",
+    "camelize/": "https://deno.land/x/camelize@2.0.0/",
+    "utils/": "./utils/",
+    "commands/": "./commands/"
+  }
 }
