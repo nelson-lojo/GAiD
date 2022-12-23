@@ -1,6 +1,0 @@
-discord.py
-async-timeout
-requests
-psycopg2-binary
-sqlalchemy
-apscheduler
