@@ -2,7 +2,7 @@ import {
     rest,
     setApplicationId,
     upsertSlashCommands,
-} from "../../deps.ts";
+} from "discordeno/mod.ts";
 
 import { decode } from "encoding/base64url.ts";
 import { json } from "sift/mod.ts";
