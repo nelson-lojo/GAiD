@@ -39,7 +39,7 @@ class Navigator:
         await self.watch()
 
     def _check(self, reaction, user):
-        """verify that we only change the displayed page if the uuser that requests is correct"""
+        """verify that we only change the displayed page if the user that requests is correct"""
         return user == self.author and reaction.message == self.message
 
     def _get_result(self, emoji: str) -> Result:
