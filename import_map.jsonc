@@ -5,6 +5,7 @@
     "encoding/": "https://deno.land/std@0.156.0/encoding/",
     "camelize/": "https://deno.land/x/camelize@2.0.0/",
     "utils/": "./utils/",
-    "commands/": "./commands/"
+    "commands/": "./commands/",
+    "models/" : "./models/"
   }
 }

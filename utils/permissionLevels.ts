@@ -1,8 +1,8 @@
 // import { validatePermissions } from "../../deps.ts";
-
+/*
 import { Interaction } from "discordeno/mod.ts";
 
-import { Command } from "commands/mod.ts";
+import { Command } from "models/mod.ts";
 
 export async function hasPermissionLevel(command: Command, payload: Interaction) {
     // This command doesnt require a perm level so allow the command.
@@ -28,22 +28,16 @@ export const PermissionLevelHandlers: Record<
     (payload: Interaction, command: Command) => boolean | Promise<boolean>
 > = {
     MEMBER: () => true,
-    MODERATOR: (payload) => 
-        Boolean(payload.member?.permissions) &&
-        validatePermissions(payload.member!.permissions, ["MANAGE_GUILD"]),
-    ADMIN: (payload) =>
-        Boolean(payload.member?.permissions) &&
+    PRIVILEGED: (payload) =>
+        Boolean(payload.member?.permissions) && //TODO: implement permission validation
         validatePermissions(payload.member!.permissions, ["ADMINISTRATOR"]),
     // TODO: Add your user id here and anyone else you want to give access to.
-    BOT_OWNERS: (payload) => [""].includes((payload.member?.user?.id || payload.user?.id!).toString()),
+    BOT_OWNER: (payload) => [""].includes((payload.member?.user?.id || payload.user?.id!).toString()),
 };
 
 export enum PermissionLevels {
     MEMBER,
-    MODERATOR,
-    ADMIN,
-    SERVER_OWNER,
-    BOT_SUPPORT,
-    BOT_DEVS,
+    PRIVILEGED = 1,
     BOT_OWNER,
 }
+// */

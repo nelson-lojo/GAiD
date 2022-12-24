@@ -19,6 +19,7 @@ export async function redeploy(request: Request) {
 
 export async function updateGlobalCommands() {
     const token = Deno.env.get("DISCORD_TOKEN");
+    const url = `https://discord.com/api/v10/applications/{appID}/commands`
     rest.token = `Bot ${token}`;
     setApplicationId(
         new TextDecoder().decode(decode(token?.split(".")[0] || "")) || "",
