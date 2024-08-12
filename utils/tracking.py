@@ -90,7 +90,7 @@ class Tracker:
                     cls.table.c.label == name,
                     cls.table.c.time > (datetime.now() - age)
                 )
-            ).execute().rowcount
+            ).rowcount
 
         return count
 
